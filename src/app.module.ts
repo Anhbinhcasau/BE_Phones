@@ -49,11 +49,13 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
       useClass: ValidationPipe,
     },
     EmailService,
-    
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).exclude('auth').forRoutes('user', 'cart', 'orderdetail');
+    consumer
+      .apply(AuthMiddleware)
+      .exclude('auth')
+      .forRoutes('user', 'cart', 'orderdetail');
   }
 }
