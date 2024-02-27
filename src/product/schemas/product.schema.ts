@@ -25,6 +25,7 @@ export class Product {
     devide_storage: string;
     price: number;
     image: string;
+    
   }[];
 
   @Prop({
