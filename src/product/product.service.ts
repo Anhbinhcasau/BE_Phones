@@ -20,7 +20,7 @@ export class ProductService {
     private orderDetailService: OrderdetailService,
     private userService: UserService
   ) {}
-
+  
   async create(product: ProductDto) {
     const idsAttribute = product.attributes.map((value, index) => {
       return {

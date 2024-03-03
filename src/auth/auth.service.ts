@@ -35,7 +35,6 @@ export class AuthService {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-    console.log(`hashPassword:::: ${hashPassword}`)
     const newAccount = await this.userModel.create({
       userName,
       password: hashPassword,
@@ -49,7 +48,6 @@ export class AuthService {
       const privateKey = randomUUID().toString();
 
       const tokens = await keyTokenPairs({ newAccount }, publicKey, privateKey);
-      console.log(`tokens::::${tokens}`)
 
       const keyStore = this.tokenKeyService.createKeyToken({
         idUser: newAccount._id,
@@ -77,7 +75,6 @@ export class AuthService {
 
   async signIn({ userName, password }) {
     const user = await this.userService.findByUsername(userName);
-    console.log(`user:::: ${user}`)
     if (!user) throw new ForbiddenException('Tài khoản không tồn tại');
 
     const checkPassword = await bcrypt.compare(password, user.password);
