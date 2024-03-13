@@ -30,7 +30,9 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env' }),
-    MongooseModule.forRoot('mongodb+srv://ddoan951:choidovaobanoi22%40@cluster0.fkexucu.mongodb.net/'),
+
+    MongooseModule.forRoot(process.env.DB_URI),
+
     AuthModule,
     UserModule,
     ProductModule,
@@ -49,11 +51,13 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
       useClass: ValidationPipe,
     },
     EmailService,
-    
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).exclude('auth').forRoutes('user', 'cart', 'orderdetail');
+    consumer
+      .apply(AuthMiddleware)
+      .exclude('auth')
+      .forRoutes('user', 'cart', 'orderdetail');
   }
 }
