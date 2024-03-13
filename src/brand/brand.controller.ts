@@ -5,12 +5,12 @@ import { BrandService } from './brand.service';
 export class BrandController {
     constructor(private brandService: BrandService) {}
 
-    @Post()
+    @Post() //create
     async newBrand(@Body() brand: { name: string }) {
         return await this.brandService.create(brand)
     }
 
-    @Get()
+    @Get() //read
     async findAllBrands() {
         return await this.brandService.findAll();
     }
@@ -29,8 +29,4 @@ export class BrandController {
     async deleteBrand(@Param('id') id: string) {
         return await this.brandService.delete(id);
     }
-
-
-
-
 }

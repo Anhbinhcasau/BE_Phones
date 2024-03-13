@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UserDecorator } from 'src/user/Decorator/User.decorator';
 import { OrderdetailService } from './orderdetail.service';
-import { Status } from 'src/constants';
+import { Status } from './status';
+
 
 @Controller('orderDetail')
 export class OrderdetailController {

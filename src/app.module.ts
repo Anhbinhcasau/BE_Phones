@@ -26,11 +26,12 @@ import { Cart } from './cart/schemas/cart.schema';
 import { VoucherModule } from './voucher/voucher.module';
 import { EmailService } from './email/email.service';
 import { ChatgptModule } from './chatgpt/chatgpt.module';
+import { ResetpassModule } from './resetpass/resetpass.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env' }),
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017'),
+    MongooseModule.forRoot('mongodb+srv://ddoan951:choidovaobanoi22%40@cluster0.fkexucu.mongodb.net/'),
     AuthModule,
     UserModule,
     ProductModule,
@@ -41,6 +42,7 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
     OrderdetailModule,
     VoucherModule,
     ChatgptModule,
+    ResetpassModule,
   ],
   controllers: [],
   providers: [
