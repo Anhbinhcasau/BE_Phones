@@ -34,8 +34,10 @@ export class UserController {
       keyStore
     });
   }
-  @Post('')
-  async create(@Body() user: UserDto) {}
+  @Post('create')
+  async create(@Body() user: UserDto) {
+    return await this.userService.createUser(user)
+  }
 
   @Post('edit')
   async edit(@Body() user){

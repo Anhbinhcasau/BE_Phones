@@ -30,7 +30,4 @@ export class BrandController {
         return await this.brandService.delete(id);
     }
 
-
-
-
 }
