@@ -27,7 +27,5 @@ export class BrandService {
 
     async delete(id: string) {
         return await this.brandModel.findByIdAndRemove(id).exec();
-    }
-    
-    
+    } 
 }

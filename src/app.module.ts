@@ -30,7 +30,7 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env' }),
-    MongooseModule.forRoot(process.env.DB_LOCAL),
+    MongooseModule.forRoot(process.env.DB_URI),
     AuthModule,
     UserModule,
     ProductModule,

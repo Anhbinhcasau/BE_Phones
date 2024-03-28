@@ -13,6 +13,7 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/schemas/user.schema';
 import { CommentProductStrategy } from './strategy/commentproduct';
 import { EditProductStrategy } from './strategy/editproducts';
+import { ProductContext } from './strategy/context';
 
 @Injectable()
 export class ProductService {

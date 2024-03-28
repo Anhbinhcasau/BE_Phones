@@ -1,4 +1,4 @@
-class ProductContext {
+export class ProductContext {
   private strategy: ProductStrategy;
 
   constructor(private productModel: any, private orderDetailService: any) {}
