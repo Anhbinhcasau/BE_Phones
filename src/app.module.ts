@@ -26,6 +26,7 @@ import { Cart } from './cart/schemas/cart.schema';
 import { VoucherModule } from './voucher/voucher.module';
 import { EmailService } from './email/email.service';
 import { ChatgptModule } from './chatgpt/chatgpt.module';
+import { ResetpassModule } from './resetpass/resetpass.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ChatgptModule } from './chatgpt/chatgpt.module';
     OrderdetailModule,
     VoucherModule,
     ChatgptModule,
+    ResetpassModule,
   ],
   controllers: [],
   providers: [

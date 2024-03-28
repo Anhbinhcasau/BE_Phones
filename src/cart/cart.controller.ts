@@ -35,12 +35,12 @@ export class CartController {
   }
 
   @Get('findCart')
-  async findCart(@UserDecorator() user){
-      return await this.cartService.findCartByUserId(user._id);
+  async findCart(@UserDecorator() user) {
+    return await this.cartService.findCartByUserId(user._id);
   }
 
   @Post('newCart')
-  async newCart(@Body() newCart){
-    return await this.cartService.newUserCartAndUpdateItem(newCart)
+  async newCart(@Body() newCart) {
+    return await this.cartService.newUserCartAndUpdateItem(newCart);
   }
 }

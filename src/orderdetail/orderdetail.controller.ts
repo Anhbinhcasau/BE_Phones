@@ -1,54 +1,41 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UserDecorator } from 'src/user/Decorator/User.decorator';
 import { OrderdetailService } from './orderdetail.service';
-import { Status } from 'src/constants';
+import { Status } from './status';
+import {
+  CancelState,
+  CompletedState,
+  DeliveringState,
+  GettingItemState,
+  PackingState,
+} from './methodhandler';
+import { OrderContext } from './OrderContext';
 
 @Controller('orderDetail')
 export class OrderdetailController {
-    constructor(private orderDetailService: OrderdetailService){}
+  constructor(private orderDetailService: OrderdetailService) {}
 
-    @Get('history')
-    async orderHistory(@UserDecorator() user) {
-      return this.orderDetailService.findOrderHistoryByUserId({ userId: user._id });
-    }
+  @Get('history')
+  async orderHistory(@UserDecorator() user) {
+    return this.orderDetailService.findOrderHistoryByUserId({
+      userId: user._id,
+    });
+  }
 
-    @Get('getAll')
-    async getAllOrderHistory(){
-        return await this.orderDetailService.findAllOrderHistory()
-    }
+  @Get('getAll')
+  async getAllOrderHistory() {
+    return await this.orderDetailService.findAllOrderHistory();
+  }
 
-    @Get(':orderId')
-    async findOrderDetail(@Param('orderId') orderId) {
-      return await this.orderDetailService.findOrderDetailById({orderId});
-    }
+  @Get(':orderId')
+  async findOrderDetail(@Param('orderId') orderId) {
+    return await this.orderDetailService.findOrderDetailById({ orderId });
+  }
 
-    @Post('getting_item')
-    async gettingItemOrder(@UserDecorator() user, @Body() orderDetail){
-        return await this.orderDetailService.changeStatusOrderDetail
-        ({userId: orderDetail.userId, orderDetailId: orderDetail._id, status: Status.GETTING_ITEM})
-    }
-
-    @Post('completed')
-    async completedOrderDetail(@UserDecorator() user, @Body() orderDetail){
-        return await this.orderDetailService.changeStatusOrderDetail
-        ({userId: orderDetail.userId, orderDetailId: orderDetail._id, status: Status.COMPLETED})
-    }
-
-    @Post('packaging')
-    async packagingOrderDetail(@UserDecorator() user, @Body() orderDetail){
-        return await this.orderDetailService.changeStatusOrderDetail
-        ({userId: orderDetail.userId, orderDetailId: orderDetail._id, status: Status.PACKAGING})
-    }
-
-    @Post('delivering')
-    async devliveryOrderDetail(@UserDecorator() user, @Body() orderDetail){
-        return await this.orderDetailService.changeStatusOrderDetail
-        ({userId: orderDetail.userId, orderDetailId: orderDetail._id, status: Status.DELIVERING})
-    }
-
-    @Post('cancel')
-    async cancelOrderDetail(@UserDecorator() user, @Body() orderDetail){
-        return await this.orderDetailService.changeStatusOrderDetail
-        ({userId: orderDetail.userId, orderDetailId: orderDetail._id, status: Status.CANCELED})
-    }
+  @Post('change_status')
+  async changeOrderStatus(@UserDecorator() user, @Body() orderDetail) {
+    const context: OrderContext = new OrderContext(this.orderDetailService);
+    const { userId, _id: orderDetailId, status: newStatus } = orderDetail;
+    return await context.changeState(userId, orderDetailId, newStatus);
+  }
 }
