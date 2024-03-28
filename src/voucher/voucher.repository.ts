@@ -2,8 +2,9 @@ import { Injectable, HttpException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Voucher } from './schemas/voucher.schema';
+import { IVoucherRepository } from './IVoucherRepository';
 
-export class VoucherRepository {
+export class VoucherRepository implements IVoucherRepository {
   constructor(
     @InjectModel(Voucher.name) private readonly voucherModel: Model<Voucher>,
   ) {}
