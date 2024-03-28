@@ -1,38 +1,42 @@
+import { FindByUsernameCommand } from './find-by-username.command';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Error, Model, Types } from 'mongoose';
+import { FindByUserIdCommand } from './find-by-userid.command';
+import { ChangeProfileUserCommand } from './change-profile-user.command';
+import { ListUsersCommand } from './list-users.command';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+  ) {}
+
+  async executeCommand(command: any) {
+    return await command.execute();
+  }
 
   async findByUsername(
     userName,
-    select = {
-      userName: 1,
-      password: 1,
-      roles: 1,
-    },
+    select = { userName: 1, password: 1, roles: 1 },
   ) {
-    return await this.userModel.findOne({ userName }).select(select);
+    const command = new FindByUsernameCommand(this.userModel, userName, select);
+    return await this.executeCommand(command);
   }
 
   async findByUserId(userId) {
-    return await this.userModel.findById(userId);
+    const command = new FindByUserIdCommand(this.userModel, userId);
+    return await this.executeCommand(command);
   }
 
-  async changeProfileUser({ user }) {
-    const foundUser = await this.userModel.findById(user._id);
-    if (!foundUser) throw new ForbiddenException('Không tìm thấy user');
-    const filter = { _id: new Types.ObjectId(user._id) },
-      newUpdate = { ...user, _id: new Types.ObjectId(user._id) },
-      option = { upsert: true, new: true };
-
-    return await this.userModel.findByIdAndUpdate(filter, newUpdate, option);
+  async changeProfileUser(user) {
+    const command = new ChangeProfileUserCommand(this.userModel, user);
+    return await this.executeCommand(command);
   }
 
-  async listUser() {
-    return await this.userModel.find().exec();
+  async listUsers() {
+    const command = new ListUsersCommand(this.userModel);
+    return await this.executeCommand(command);
   }
 }
