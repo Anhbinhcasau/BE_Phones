@@ -8,18 +8,25 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './schemas/product.schema';
 import { Model, Types } from 'mongoose';
 import { ProductDto } from './dto/product.dto';
-import { NotFoundError } from 'rxjs';
 import { OrderdetailService } from 'src/orderdetail/orderdetail.service';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/schemas/user.schema';
+import { CommentProductStrategy } from './strategy/commentproduct';
+import { EditProductStrategy } from './strategy/editproducts';
 
 @Injectable()
 export class ProductService {
+  private productContext: ProductContext;
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
     private orderDetailService: OrderdetailService,
-    private userService: UserService
-  ) {}
+    private userService: UserService,
+  ) {
+    this.productContext = new ProductContext(
+      this.productModel,
+      this.orderDetailService,
+    );
+  }
 
   async create(product: ProductDto) {
     const idsAttribute = product.attributes.map((value, index) => {
@@ -48,8 +55,8 @@ export class ProductService {
     return listItems;
   }
 
-  async deleteProductById({productId}){
-    return await this.productModel.findOneAndDelete({_id: productId});
+  async deleteProductById({ productId }) {
+    return await this.productModel.findOneAndDelete({ _id: productId });
   }
 
   async updateQuantityProduct({ productId, productAttrId, quantityChange }) {
@@ -76,13 +83,13 @@ export class ProductService {
   }
 
   async getProductById({ idProduct }) {
-    const foundProduct : any = await this.productModel.findById(idProduct);
+    const foundProduct: any = await this.productModel.findById(idProduct);
     if (!foundProduct) throw new BadGatewayException('Không tìm thấy sản phẩm');
-    const comments : any = foundProduct.comments || [];
+    const comments: any = foundProduct.comments || [];
 
     for (const [index, comment] of comments.entries()) {
-      const user : any  = await this.userService.findByUserId(comment.userId)
-      foundProduct.comments[index].userId = user
+      const user: any = await this.userService.findByUserId(comment.userId);
+      foundProduct.comments[index].userId = user;
     }
     return foundProduct;
   }
@@ -100,30 +107,15 @@ export class ProductService {
     return foundProduct.attributes.find((value) => value.id === idAttr);
   }
 
-  async editProductById(product){
-    const {_id, ...productChange} = product 
-    const foundProduct = await this.productModel.findById(new Types.ObjectId(_id))
-    if(!foundProduct) throw new ConflictException('Không tìm thấy sản phẩm')
-
-    return await this.productModel.updateOne({_id}, productChange)
+  async editProductById(product) {
+    this.productContext.setStrategy(new EditProductStrategy(this.productModel));
+    return this.productContext.executeStrategy(product);
   }
 
-  async commentProduct(product){
-    const foundOrderDetailSuccess = await this.orderDetailService
-    .isOrderDetailSuccess({userId: product.userId, productId: product.productId})
-
-    if(!foundOrderDetailSuccess) throw new ForbiddenException('Bạn không thể đánh giá vì chưa mua sản phẩm')
-
-    const foundProduct = await this.productModel.find(new Types.ObjectId(product.productId))
-    const foundComment = foundProduct.flatMap(val => val.comments)
-
-    const checkExistComment = foundComment.some((val : any) =>{
-      return val.userId.toString() === product.userId.toString()
-    });
-
-    if(checkExistComment) throw new ForbiddenException("Bạn đã bình luận sản phẩm này rồi")
-    
-    const filter = {_id: product.productId}, update = { $push: { comments: {...product, userId: new Types.ObjectId(product.userId)}}}, options = { new: true, upsert: true}
-    return await this.productModel.findByIdAndUpdate(filter, update, options)
+  async commentProduct(product) {
+    this.productContext.setStrategy(
+      new CommentProductStrategy(this.productModel, this.orderDetailService),
+    );
+    return this.productContext.executeStrategy(product);
   }
 }
