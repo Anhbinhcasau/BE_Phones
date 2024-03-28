@@ -1,43 +1,49 @@
-import { IsArray, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString } from "class-validator"
-
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+} from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 export class VoucherUseDto {
-    @IsNotEmpty()
-    @IsString()
-    codeVoucher: string
+  @IsNotEmpty()
+  @IsString()
+  codeVoucher: string;
 
-    @IsNotEmpty()
-    @IsString()
-    userId: string;
+  @IsNotEmpty()
+  @IsString()
+  userId: string;
 }
 
 export class VoucherDto {
+  @IsNotEmpty()
+  @IsNumber()
+  priceSale: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    priceSale: number
+  @IsArray()
+  userUsed: ObjectId[];
 
-    @IsArray()
-    userUsed: []
+  @IsString()
+  @IsNotEmpty()
+  nameVoucher: string;
 
-    @IsString()
-    @IsNotEmpty()
-    nameVoucher: string
+  @IsString()
+  @IsNotEmpty()
+  description: string;
 
-    @IsString()
-    @IsNotEmpty()
-    description: string
+  @IsNumber()
+  @IsPositive()
+  maxPriceSale: number;
 
-    @IsNumber()
-    @IsPositive()
-    maxPriceSale: number
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  quantity: number;
 
-    @IsInt()
-    @IsNotEmpty()
-    @IsPositive()
-    quantity: number;
-
-    @IsString()
-    @IsNotEmpty()
-    codeVoucher: string;
+  @IsString()
+  @IsNotEmpty()
+  codeVoucher: string;
 }
