@@ -1,20 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsPositive } from 'class-validator';
-import { HydratedDocument, Types } from 'mongoose';
-import { AttributeDto } from '../dto/attributes.tdo';
-
-// export type UserDocument = HydratedDocument<User>;
+import { Document, Types } from 'mongoose';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsArray } from 'class-validator';
 
 @Schema()
-export class Product {
-  // @Prop({
-  //     required: true,
-  //     ref: 'brand'
-  //   })
-  //   brand: Types.ObjectId;
-
+export class Product extends Document {
   @Prop({
-    require: true,
+    required: true,
     default: [],
   })
   attributes: {
@@ -31,6 +22,8 @@ export class Product {
     required: true,
     length: 40,
   })
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
   @Prop({
@@ -38,36 +31,46 @@ export class Product {
     default: 0,
     validate: [IsPositive],
   })
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
   price: number;
 
   @Prop({
-    require: true,
+    required: true,
     default: 0,
     validate: [IsPositive],
   })
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
   quantity_sold: number;
 
   @Prop({
-    require: true,
+    required: true,
     default: 'Không có mô tả',
     length: 1000,
   })
+  @IsNotEmpty()
+  @IsString()
   description: string;
 
-  @Prop({ require: true })
+  @Prop({ required: true })
+  @IsNotEmpty()
+  @IsString()
   main_image: string;
 
   @Prop({
     required: true,
   })
+  @IsArray()
+  @IsNotEmpty()
   highlights: [];
 
   @Prop({
-    require: true,
+    required: true,
   })
-  detail: string;
-
-  @Prop()
+  @IsString()
   brand: string;
 
   @Prop({

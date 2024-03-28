@@ -12,33 +12,27 @@ import { NotFoundError } from 'rxjs';
 import { OrderdetailService } from 'src/orderdetail/orderdetail.service';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/schemas/user.schema';
+import { IProductFactory } from './interface/product.interface';
+import { ProductFactory } from './factory/product.factory';
 
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectModel(Product.name) private productModel: Model<Product>,
+    @InjectModel(Product.name) 
+    private productModel: Model<Product>,
+    private productFactory: ProductFactory,
     private orderDetailService: OrderdetailService,
     private userService: UserService
   ) {}
 
-  async create(product: ProductDto) {
-    const idsAttribute = product.attributes.map((value, index) => {
-      return {
-        id: index,
-        ...value,
-      };
-    });
-    const newItem = await this.productModel.create({
-      ...product,
-      attributes: idsAttribute,
-    });
-    if (!newItem) throw new ConflictException('Lỗi khi tạo sản phẩm');
-
-    return {
-      message: 'Tạo mới sản phẩm thành công',
-      status: 201,
-      metadata: product,
-    };
+  async createProduct(type: string, productData: ProductDto): Promise<Product> {
+    try {
+      const product = this.productFactory.createProduct(type, productData);
+      const createdProduct = new this.productModel(product);
+      return await createdProduct.save();
+    } catch (error) {
+      throw new BadGatewayException('Lỗi khi tạo sản phẩm');
+    }
   }
 
   async listPros() {

@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductDto } from './dto/product.dto';
 import { ObjectId } from 'mongodb';
-
 import mongoose, { Mongoose, Types } from 'mongoose';
 import { CommentDto } from './dto/comments.dto';
 
@@ -16,8 +15,8 @@ export class ProductController {
   }
 
   @Post()
-  async addProduct(@Body() product: ProductDto) {
-    return this.productService.create(product);
+  async addProduct(@Body() productDto: ProductDto, @Query('type') type: string) {
+    return this.productService.createProduct(type, productDto);
   }
 
   @Get(':id')

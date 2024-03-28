@@ -1,27 +1,18 @@
-import {
-  IsArray,
-  IsBase64,
-  IsEmpty,
-  IsMongoId,
-  IsNotEmpty,
-  IsNumber,
-  IsPositive,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsPositive, IsString, ValidateNested, IsMongoId } from 'class-validator';
 import { Type } from 'class-transformer';
-
-import { AttributeDto } from './attributes.tdo';
 import { Types } from 'mongoose';
+import { AttributeDto } from './attributes.tdo';
 
 export class ProductDto {
+
+  @IsNotEmpty()
+  @IsString()
+  type: string;
+
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  // @IsMongoId()
-  // @IsNotEmpty()
-  // brand: Types.ObjectId
   @IsNumber()
   @IsPositive()
   quantity_sold: number;
@@ -31,18 +22,19 @@ export class ProductDto {
   description: string;
 
   @IsNotEmpty()
-  @Type(() => AttributeDto)
-  @ValidateNested({ each: true })
   @IsArray()
+  @ValidateNested({ each: true }) // Kiểm tra từng phần tử trong mảng
+  @Type(() => AttributeDto)
   attributes: AttributeDto[];
 
   @IsArray()
   @IsNotEmpty()
-  highlights: [];
+  @IsString({ each: true }) // Kiểm tra từng phần tử trong mảng
+  highlights: string[];
 
   @IsNotEmpty()
-  // @()
-  main_image: Buffer;
+  @IsString()
+  main_image: string;
 
   @IsString()
   brand: string;

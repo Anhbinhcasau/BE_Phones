@@ -24,9 +24,9 @@ export class AttributeDto {
   @IsInt()
   quantity: number;
 
-  // @IsNotEmpty()
-  // @IsString()
-  // devide_storage?: string;
+  @IsNotEmpty()
+  @IsString()
+  devide_storage?: string;
 
   @IsNumber()
   @IsNotEmpty()
