@@ -9,14 +9,14 @@ export class Voucher {
   @Prop({
     required: true,
     min: 1,
-    max: 100
+    max: 100,
   })
   priceSale: number;
 
   @Prop({
     required: true,
   })
-  userUsed: []
+  userUsed: Types.ObjectId[];
 
   @Prop({
     require: true,
@@ -35,7 +35,7 @@ export class Voucher {
 
   @Prop({
     required: true,
-    min: 0
+    min: 0,
   })
   quantity: number;
 
