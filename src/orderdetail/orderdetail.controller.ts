@@ -29,8 +29,6 @@ export class OrderdetailController {
 
   @Get(':orderId')
   async findOrderDetail(@Param('orderId') orderId) {
-    //uh bí quá thì facade đi nha :))) ok hùng ơi
-
     return await this.orderDetailService.findOrderDetailById({ orderId });
   }
 

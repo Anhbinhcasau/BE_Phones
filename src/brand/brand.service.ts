@@ -13,11 +13,9 @@ export class BrandService {
             .setName(name);
         return await (await brandBuilder).build();
     }
-
   async findAll() {
     return await this.brandModel.find().exec();
   }
-
   async findById(id: string) {
     return await this.brandModel.findById(id).exec();
   }

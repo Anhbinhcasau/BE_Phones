@@ -17,7 +17,7 @@ export class BrandBuilder {
   }
 
   async setName(name: string) {
-    const brand = await this.brandModel.findOne({ name }).exec();
+    const brand = await this.brandModel.findOne({name}).exec();
 
     if (brand) {
       throw new BadRequestException('Brand name is already exist');
