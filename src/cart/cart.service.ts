@@ -5,47 +5,84 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ProductService } from 'src/product/product.service';
 import { ProductDto, ProductToCartDto } from 'src/product/dto/product.dto';
 import { ItemToCartDto } from './dto/cart.dto';
+import { CartObservable } from './cartobserver';
 
 @Injectable()
 export class CartService {
-  constructor(
-    @InjectModel(Cart.name) private cartModel: Model<Cart>,
-  ) {}
-
-  async newUserCartAndUpdateItem({ userId, product, priceSale = 0, percentSale = 0 }) {
+  private cartObservable = new CartObservable();
+  constructor(@InjectModel(Cart.name) private cartModel: Model<Cart>) {}
+  async newUserCartAndUpdateItem({
+    userId,
+    product,
+    priceSale = 0,
+    percentSale = 0,
+  }) {
     const itemsCart = Object.keys(product).length === 0 ? [] : [product];
-  
+
     const query = { user: userId },
       update = {
         price_sale: priceSale,
-        percent_sale: percentSale, 
+        percent_sale: percentSale,
         $addToSet: {
           items_cart: { $each: itemsCart },
         },
       },
       options = { upsert: true, new: true };
 
-
-  
-    return await this.cartModel.findOneAndUpdate(query, update, options);
+    const updatedCart = await this.cartModel.findOneAndUpdate(
+      query,
+      update,
+      options,
+    );
+    this.cartObservable.notifyObservers(updatedCart);
+    return updatedCart;
   }
-  
+  async addToCart({ userId, product }) {
+    const userCart = await this.cartModel.findOne({ user: userId }).exec();
+    if (!userCart) {
+      await this.newUserCartAndUpdateItem({ userId, product });
+      const updatedCart = await this.totalPriceCart({ userId });
+      this.cartObservable.notifyObservers(updatedCart);
+      return updatedCart;
+    }
+
+    if (!userCart.items_cart.length) {
+      await this.cartModel.updateOne({ user: userId, items_cart: product });
+      const updatedCart = await this.totalPriceCart({ userId });
+      this.cartObservable.notifyObservers(updatedCart);
+      return updatedCart;
+    }
+
+    if (
+      userCart.items_cart.length &&
+      !(await this.findItemInCart({ userId, cartId: userCart._id, product }))
+    ) {
+      await this.newUserCartAndUpdateItem({ userId, product });
+      const updatedCart = await this.totalPriceCart({ userId });
+      this.cartObservable.notifyObservers(updatedCart);
+      return updatedCart;
+    }
+
+    const updatedCart = await this.updateQuantityItemCart(userId, product);
+    this.cartObservable.notifyObservers(updatedCart);
+    return updatedCart;
+  }
 
   async updateQuantityItemCart(userId, product) {
     const { id, quantity, productId, price, old_quantity } = product;
 
     let query = {
         user: userId,
-        'items_cart':{
+        items_cart: {
           $elemMatch: {
             productId,
-            id
-          }
-        }
+            id,
+          },
+        },
       },
       options = { upsert: true, new: true };
 
-    const updateSetV2 = {}
+    const updateSetV2 = {};
 
     const newQuantity = old_quantity + quantity;
     const updateSet =
@@ -60,7 +97,9 @@ export class CartService {
             },
           };
     await this.cartModel.findOneAndUpdate(query, updateSet, options);
-    return await this.totalPriceCart({ userId });
+    const updatedCart = await this.totalPriceCart({ userId });
+    this.cartObservable.notifyObservers(updatedCart);
+    return updatedCart;
   }
 
   async totalPriceCart({ userId }) {
@@ -96,30 +135,6 @@ export class CartService {
     return foundItem;
   }
 
-  async addToCart({ userId, product }) {
-    const userCart = await this.cartModel.findOne({ user: userId }).exec();
-    if (!userCart) {
-      await this.newUserCartAndUpdateItem({ userId, product });
-      return await this.totalPriceCart({ userId });
-    }
-
-    if (!userCart.items_cart.length) {
-      await this.cartModel.updateOne({ user: userId, items_cart: product });
-      return await this.totalPriceCart({ userId });
-    }
-
-    if (
-      userCart.items_cart.length &&
-      !(await this.findItemInCart({ userId, cartId: userCart._id, product }))
-    ) {
-      await this.newUserCartAndUpdateItem({ userId, product });
-      return await this.totalPriceCart({ userId });
-    }
-    await this.totalPriceCart({ userId });
-
-    return await this.updateQuantityItemCart(userId, product);
-  }
-
   async findCartByUserId(userId) {
     return await this.cartModel.findOne({ user: userId }).exec();
   }
@@ -132,10 +147,16 @@ export class CartService {
         },
         percent_sale: 0,
         total_price_cart: 0,
-        price_sale: 0
+        price_sale: 0,
       },
       options = { upsert: true, new: true };
-    return await this.cartModel.findOneAndUpdate(query, update, options);
+    const updatedCart = await this.cartModel.findOneAndUpdate(
+      query,
+      update,
+      options,
+    );
+    this.cartObservable.notifyObservers(updatedCart);
+    return updatedCart;
   }
 
   async deleteItemCart({ userId, cartId }, product) {
@@ -151,6 +172,12 @@ export class CartService {
       },
       options = { new: true, upsert: true };
 
-    return await this.cartModel.findOneAndUpdate(query, updateSet, options);
+    const updatedCart = await this.cartModel.findOneAndUpdate(
+      query,
+      updateSet,
+      options,
+    );
+    this.cartObservable.notifyObservers(updatedCart);
+    return updatedCart;
   }
 }
