@@ -5,6 +5,16 @@ export class MobilePhone implements IProductFactory {
   constructor(private data: ProductDto) {}
 
   createProduct(type: string, data: ProductDto): any {
-    // Triển khai logic tạo sản phẩm điện thoại di động
+    const phoneProduct = {
+        type: type,
+        name: data.name,
+        quantity_sold: data.quantity_sold,
+        description: data.description,
+        attributes: data.attributes,
+        highlights: data.highlights,
+        main_image: data.main_image,
+        brand: data.brand,
+      };
+      return phoneProduct;
   }
 }
