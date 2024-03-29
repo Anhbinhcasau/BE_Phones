@@ -5,11 +5,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ProductService } from 'src/product/product.service';
 import { ProductDto, ProductToCartDto } from 'src/product/dto/product.dto';
 import { ItemToCartDto } from './dto/cart.dto';
-import { CartObservable } from './cartobserver';
+import { CartObservable } from './cartobservable';
 
 @Injectable()
 export class CartService {
-  private cartObservable = new CartObservable();
   constructor(@InjectModel(Cart.name) private cartModel: Model<Cart>) {}
   async newUserCartAndUpdateItem({
     userId,
@@ -34,7 +33,6 @@ export class CartService {
       update,
       options,
     );
-    this.cartObservable.notifyObservers(updatedCart);
     return updatedCart;
   }
   async addToCart({ userId, product }) {
@@ -42,14 +40,12 @@ export class CartService {
     if (!userCart) {
       await this.newUserCartAndUpdateItem({ userId, product });
       const updatedCart = await this.totalPriceCart({ userId });
-      this.cartObservable.notifyObservers(updatedCart);
       return updatedCart;
     }
 
     if (!userCart.items_cart.length) {
       await this.cartModel.updateOne({ user: userId, items_cart: product });
       const updatedCart = await this.totalPriceCart({ userId });
-      this.cartObservable.notifyObservers(updatedCart);
       return updatedCart;
     }
 
@@ -59,12 +55,10 @@ export class CartService {
     ) {
       await this.newUserCartAndUpdateItem({ userId, product });
       const updatedCart = await this.totalPriceCart({ userId });
-      this.cartObservable.notifyObservers(updatedCart);
       return updatedCart;
     }
 
     const updatedCart = await this.updateQuantityItemCart(userId, product);
-    this.cartObservable.notifyObservers(updatedCart);
     return updatedCart;
   }
 
@@ -98,7 +92,6 @@ export class CartService {
           };
     await this.cartModel.findOneAndUpdate(query, updateSet, options);
     const updatedCart = await this.totalPriceCart({ userId });
-    this.cartObservable.notifyObservers(updatedCart);
     return updatedCart;
   }
 
@@ -155,7 +148,6 @@ export class CartService {
       update,
       options,
     );
-    this.cartObservable.notifyObservers(updatedCart);
     return updatedCart;
   }
 
@@ -177,7 +169,6 @@ export class CartService {
       updateSet,
       options,
     );
-    this.cartObservable.notifyObservers(updatedCart);
     return updatedCart;
   }
 }
