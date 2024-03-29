@@ -12,14 +12,25 @@ import { ProductDto } from './dto/product.dto';
 import { OrderdetailService } from 'src/orderdetail/orderdetail.service';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/schemas/user.schema';
+import { CommentProductStrategy } from './strategy/commentproduct';
+import { EditProductStrategy } from './strategy/editproducts';
+import { ProductContext } from './strategy/context';
 
 @Injectable()
 export class ProductService {
+  private productContext: ProductContext;
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
     private orderDetailService: OrderdetailService,
     private userService: UserService,
-  ) {}
+
+  ) {
+    this.productContext = new ProductContext(
+      this.productModel,
+      this.orderDetailService,
+    );
+  }
+
 
   async create(product: ProductDto) {
     const idsAttribute = product.attributes.map((value, index) => {
@@ -76,6 +87,7 @@ export class ProductService {
     const foundProduct: any = await this.productModel.findById(idProduct);
     if (!foundProduct) throw new BadGatewayException('Không tìm thấy sản phẩm');
     const comments: any = foundProduct.comments || [];
+
     for (const [index, comment] of comments.entries()) {
       const user: any = await this.userService.findByUserId(comment.userId);
       foundProduct.comments[index].userId = user;
@@ -94,44 +106,18 @@ export class ProductService {
 
     return foundProduct.attributes.find((value) => value.id === idAttr);
   }
+
+
   async editProductById(product) {
-    const { _id, ...productChange } = product;
-    const foundProduct = await this.productModel.findById(
-      new Types.ObjectId(_id),
-    );
-    if (!foundProduct) throw new ConflictException('Không tìm thấy sản phẩm');
-
-    return await this.productModel.updateOne({ _id }, productChange);
+    this.productContext.setStrategy(new EditProductStrategy(this.productModel));
+    return this.productContext.executeStrategy(product);
   }
+
   async commentProduct(product) {
-    const foundOrderDetailSuccess =
-      await this.orderDetailService.isOrderDetailSuccess({
-        userId: product.userId,
-        productId: product.productId,
-      });
-    if (!foundOrderDetailSuccess)
-      throw new ForbiddenException(
-        'Bạn không thể đánh giá vì chưa mua sản phẩm',
-      );
-    const foundProduct = await this.productModel.find(
-      new Types.ObjectId(product.productId),
+    this.productContext.setStrategy(
+      new CommentProductStrategy(this.productModel, this.orderDetailService),
     );
-    const foundComment = foundProduct.flatMap((val) => val.comments);
+    return this.productContext.executeStrategy(product);
 
-    const checkExistComment = foundComment.some((val: any) => {
-      return val.userId.toString() === product.userId.toString();
-    });
-
-    if (checkExistComment)
-      throw new ForbiddenException('Bạn đã bình luận sản phẩm này rồi');
-
-    const filter = { _id: product.productId },
-      update = {
-        $push: {
-          comments: { ...product, userId: new Types.ObjectId(product.userId) },
-        },
-      },
-      options = { new: true, upsert: true };
-    return await this.productModel.findByIdAndUpdate(filter, update, options);
   }
 }

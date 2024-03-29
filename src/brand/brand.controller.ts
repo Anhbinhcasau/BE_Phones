@@ -1,32 +1,35 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { BrandService } from './brand.service';
+import { BrandFacade } from './facade/brand.facade';
+import { Brand } from './schemas/brand.schema';
 
 @Controller('brand')
 export class BrandController {
-    constructor(private brandService: BrandService) {}
+    constructor(private readonly brandFacade: BrandFacade) {}
 
-    @Post() //create
-    async newBrand(@Body() brand: { name: string }) {
-        return await this.brandService.create(brand)
+
+    @Post()
+    async create(@Body('name') name: string): Promise<Brand> {
+        return this.brandFacade.createBrand(name);
+
     }
 
     @Get() //read
     async findAllBrands() {
-        return await this.brandService.findAll();
+        return await this.brandFacade.getAllBrands();
     }
 
     @Get(':id')
     async findBrandById(@Param('id') id: string) {
-        return await this.brandService.findById(id);
+        return await this.brandFacade.getBrandById(id);
     }
 
     @Put(':id')
-    async updateBrand(@Param('id') id: string, @Body() brand: { name: string }) {
-        return await this.brandService.update(id, brand);
+    async update(@Param('id') id: string, @Body('name') name: string): Promise<Brand> {
+        return this.brandFacade.updateBrand(id, name);
     }
 
     @Delete(':id')
     async deleteBrand(@Param('id') id: string) {
-        return await this.brandService.delete(id);
+        return await this.brandFacade.deleteBrand(id);
     }
 }

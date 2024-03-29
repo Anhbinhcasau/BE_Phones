@@ -27,7 +27,13 @@ export class BrandService {
     return await (await brandBuilder).update();
   }
 
-  async delete(id: string) {
-    return await this.brandModel.findByIdAndRemove(id).exec();
-  }
+
+    async update(id: string, { name }) {
+        return await this.brandModel.findByIdAndUpdate(id, { name }, { new: true }).exec();
+    }
+
+    async delete(id: string) {
+        return await this.brandModel.findByIdAndRemove(id).exec();
+    } 
+
 }
