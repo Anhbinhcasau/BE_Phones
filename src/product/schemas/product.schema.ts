@@ -71,9 +71,9 @@ export class Product {
   brand: string;
 
   @Prop({
-    default: []
+    default: [],
   })
-  comments: []
+  comments: [];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

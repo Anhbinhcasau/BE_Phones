@@ -26,7 +26,7 @@ export class AttributeDto {
 
   // @IsNotEmpty()
   // @IsString()
-  // devide_storage?: string;
+  // brand: string;
 
   @IsNumber()
   @IsNotEmpty()

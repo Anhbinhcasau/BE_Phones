@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './schemas/product.schema';
 import { Model, Types } from 'mongoose';
 import { ProductDto } from './dto/product.dto';
+
 import { OrderdetailService } from 'src/orderdetail/orderdetail.service';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/schemas/user.schema';
@@ -22,12 +23,14 @@ export class ProductService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     private orderDetailService: OrderdetailService,
     private userService: UserService,
+
   ) {
     this.productContext = new ProductContext(
       this.productModel,
       this.orderDetailService,
     );
   }
+
 
   async create(product: ProductDto) {
     const idsAttribute = product.attributes.map((value, index) => {
@@ -68,14 +71,11 @@ export class ProductService {
         },
       },
       options = { upsert: true };
-
     return await this.productModel.findOneAndUpdate(query, update, options);
   }
-
   async countQuantItemById(idItem, idAttr) {
     const { attributes } = await this.productModel.findById(idItem).exec();
     if (!attributes) throw new Error('Lỗi không tìm thấy item');
-
     const quantity = await attributes.filter((item) => {
       if (item.id === idAttr) return item.quantity;
       else return 0;
@@ -94,7 +94,6 @@ export class ProductService {
     }
     return foundProduct;
   }
-
   async getSubProductById({
     idProduct,
     idAttr,
@@ -108,6 +107,7 @@ export class ProductService {
     return foundProduct.attributes.find((value) => value.id === idAttr);
   }
 
+
   async editProductById(product) {
     this.productContext.setStrategy(new EditProductStrategy(this.productModel));
     return this.productContext.executeStrategy(product);
@@ -118,5 +118,6 @@ export class ProductService {
       new CommentProductStrategy(this.productModel, this.orderDetailService),
     );
     return this.productContext.executeStrategy(product);
+
   }
 }

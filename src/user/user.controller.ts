@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 import { TokenKeyService } from 'src/auth/tokenKey.service';
@@ -9,7 +17,10 @@ import { Types } from 'mongoose';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService, private tokenService: TokenKeyService) {}
+  constructor(
+    private userService: UserService,
+    private tokenService: TokenKeyService,
+  ) {}
 
   @Get('profileById/:id')
   async findUserById(@Param('id') id) {
@@ -17,28 +28,32 @@ export class UserController {
   }
 
   @Get('profile')
-  async getProfile(@UserDecorator() user){
-    return await this.userService.findByUserId(new Types.ObjectId(user._id))
+  async getProfile(@UserDecorator() user) {
+    return await this.userService.findByUserId(new Types.ObjectId(user._id));
   }
 
   @Get('')
-  async listUser(){
-    return await this.userService.listUser();
+  async listUsers() {
+    return await this.userService.listUsers();
   }
 
   @Post('handleRefreshToken')
-  async handleRefreshToken(@KeyStore() keyStore, @UserDecorator() user, @RefreshToken() refreshToken) {
+  async handleRefreshToken(
+    @KeyStore() keyStore,
+    @UserDecorator() user,
+    @RefreshToken() refreshToken,
+  ) {
     return await this.tokenService.handleRefreshToken({
       refreshToken,
       user,
-      keyStore
+      keyStore,
     });
   }
   @Post('')
   async create(@Body() user: UserDto) {}
 
   @Post('edit')
-  async edit(@Body() user){
-    return await this.userService.changeProfileUser({user})
+  async edit(@Body() user) {
+    return await this.userService.changeProfileUser({ user });
   }
 }

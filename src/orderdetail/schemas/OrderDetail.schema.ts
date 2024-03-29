@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsPositive } from 'class-validator';
 import { HydratedDocument, Types } from 'mongoose';
-import { Status } from 'src/constants';
+import { Status } from '../status';
 
 // export type UserDocument = HydratedDocument<User>;
 

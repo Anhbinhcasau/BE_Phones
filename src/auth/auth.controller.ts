@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Get, UseGuards, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  UseGuards,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserDto } from 'src/user/dto/user.dto';
 import { Request } from 'express';
@@ -20,7 +28,6 @@ export class AuthController {
     return await this.authService.signUp(userDto);
   }
 
-
   @Post('signin')
   async signIn(@Body() userLoginDto: { userName: string; password: string }) {
     return await this.authService.signIn(userLoginDto);
@@ -28,17 +35,16 @@ export class AuthController {
 
   @Post('logout')
   async logout(@UserDecorator() user) {
-    return await this.authService.logout({userId: user._id})
+    return await this.authService.logout({ userId: user._id });
   }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req){
-  }
+  async googleAuth(@Req() req) {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req, @Res() res){
+  googleAuthRedirect(@Req() req, @Res() res) {
     console.log(req.user);
     return res.redirect('http://localhost:3000/');
   }

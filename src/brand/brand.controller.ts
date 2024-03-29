@@ -6,12 +6,14 @@ import { Brand } from './schemas/brand.schema';
 export class BrandController {
     constructor(private readonly brandFacade: BrandFacade) {}
 
+
     @Post()
     async create(@Body('name') name: string): Promise<Brand> {
         return this.brandFacade.createBrand(name);
+
     }
 
-    @Get()
+    @Get() //read
     async findAllBrands() {
         return await this.brandFacade.getAllBrands();
     }
